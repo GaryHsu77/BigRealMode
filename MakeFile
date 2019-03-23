@@ -1,0 +1,114 @@
+##################################################
+#   Edit the names of tool-chain here            #
+##################################################
+ASM = masm.exe
+CC = cl.exe
+LINK = link.exe
+
+#################################################
+#  Edit the path of tool-chain here             #
+#################################################
+TOOLS_PATH = D:\MASM_MSVC\MSVC\BIN D:\MASM_MSVC\MASM\BIN
+
+################################################
+#  Edit the path of included files here        #
+################################################
+INCLUDES_PATH = D:\MASM_MSVC\MSVC\INCLUDE
+
+################################################
+#  Edit the path of Libraries here             #
+################################################
+LIBS_PATH = D:\MASM_MSVC\MSVC\LIB
+
+################################################ 
+#  Edit the Output filename here               # 
+################################################
+OUTPUT_FILE_NAME = real.exe
+
+
+
+#############################################
+#  Edit the Assembly files here             #
+#############################################
+ASM_FILES = real.asm r4g.asm
+
+
+#############################################
+#  Edit the C files here                    #
+#############################################
+C_FILES = BRM.c
+
+############################################
+# Edit the Header files here               #
+############################################
+H_FILES =
+
+##############################################
+#  Edit the C Compiler Flags here            #
+##############################################
+CFLAGS = -c /DDOS_BUILD /DTHIS_DAY=$(THIS_DAY) \
+            /DTHIS_MONTH=$(THIS_MONTH) /DTHIS_YEAR=$(THIS_YEAR)
+
+##############################################
+#  Edit the Assembler Flags here             #
+##############################################
+AFLAGS = /DDOS_BUILD
+
+
+#######################################################################
+#                Don't modify any context below!!                     #
+#######################################################################
+TOOLS_PATH2 = $(TOOLS_PATH: =;)
+INCLUDES_PATH2 = $(INCLUDES_PATH: =;)
+LIBS_PATH2 = $(LIBS_PATH: =;)
+ASM_OBJS = $(ASM_FILES:.asm=.obj)
+C_OBJS = $(C_FILES:.c=.obj)
+OUTOUT_MAP_NAME = $(OUTPUT_FILE_NAME:.exe=.map)
+
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+.asm.obj:
+	$(ASM) $(AFLAGS) $<
+
+
+# nmake all specific action
+all: setenv $(OUTPUT_FILE_NAME) rstenv
+
+
+#  clean : clean the specific file
+clean:
+	del *.obj
+	del *.map
+	del *.bak
+	del $(OUTPUT_FILE_NAME)
+
+$(OUTOUT_MAP_NAME): $(H_FILES)
+	del *.obj
+	del *.map
+
+
+# setenv : set envirenment variables
+#      @ : slient
+#  -c /c : just compile, no link
+setenv:
+	@SET OLD_PATH=$(PATH)
+	@SET OLD_INCLUDE=$(INCLUDE)
+	@set OLD_LIB=$(LIB)
+	@set OLD_CL=$(CL)
+	@SET PATH=$(TOOLS_PATH2);$(PATH)
+	@SET INCLUDE=$(INCLUDES_PATH2);$(INCLUDE)
+	@SET LIB=$(LIBS_PATH2);$(LIB)
+	@SET CL=/c
+
+# rstenv : reset envirenment varialbes
+rstenv:
+	@SET PATH=$(OLD_PATH)
+	@SET LIB=$(OLD_LIB)
+	@SET INCLUDE=$(OLD_INCLUDE)
+	@SET CL= $(OLD_CL)
+
+# make a *.exe file with *.obj
+$(OUTPUT_FILE_NAME): $(C_OBJS) $(ASM_OBJS)
+	$(LINK) $(C_OBJS) $(ASM_OBJS),$(OUTPUT_FILE_NAME), , , , 
+
